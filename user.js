@@ -24,12 +24,37 @@ class User {
       else throw new Error("wrong password");
     } else throw new Error("wrong username");
   }
-
+  async getUserByUsername(username) {
+    return await UserModel.findOne({ username: username });
+  }
   async getAll() {
     return await UserModel.find();
   }
 
-  save() {}
+  save() {
+    const hashedPassword = bcrypt.hashSync(this.password, 8);
+    const newUser = new UserModel({
+      username: this.username,
+      password: hashedPassword,
+      role: this.role,
+    });
+    newUser.save();
+  }
+
+  async updateUser() {
+    const updateUser = {
+      username: this.username,
+      password: bcrypt.hashSync(this.password, 8),
+      role: this.role,
+    };
+    await UserModel.updateOne({ username: this.username }, updateUser);
+    return updateUser;
+  }
+
+  async deleteUser(username) {
+    const user = await UserModel.find({ username: username });
+    if (user) return await UserModel.deleteOne({ username: username });
+  }
 }
 
 module.exports = User;

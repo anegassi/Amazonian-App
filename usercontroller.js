@@ -7,7 +7,8 @@ exports.signUp = async (req, res) => {
   const { username, password, role } = req.body;
   const newUser = new User(username, password, role);
   const users = await newUser.getAll();
-  const user = users.find((x) => x.username);
+  const user = users.find((x) => x.username == username);
+  console.log(users);
   if (user) {
     res.send("the account already exist ");
   } else {
@@ -43,4 +44,25 @@ exports.authorize = (req, res, next) => {
 
     next();
   } else res.send("you are not authorized");
+};
+
+exports.getUser = async (req, res) => {
+  const user = await dummy.getUserByUsername(req.params.username);
+  res.send(user);
+};
+exports.updateUser = async (req, res) => {
+  const { username, password, role } = req.body;
+  const user = new User(username, password, role);
+  const userfound = await user.getUserByUsername(req.params.username);
+
+  if (userfound) {
+    const updateUser = await user.updateUser();
+    console.log(updateUser);
+    res.send(updateUser);
+  } else res.send("please signUp");
+};
+
+exports.deleteUser = async (req, res) => {
+  const deleted = await dummy.deleteUser(req.params.username);
+  res.send(deleted);
 };
