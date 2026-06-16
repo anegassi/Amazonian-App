@@ -38,6 +38,7 @@ exports.authorize = (req, res, next) => {
   if (authHeaders) {
     const token = authHeaders.split(" ")[1];
     jwt.verify(token, PRIVATE_KEY, (err, user) => {
+      req.user = user;
       if (err) res.send("you are forbiden ");
       console.log(user);
     });

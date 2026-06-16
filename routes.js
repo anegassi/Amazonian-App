@@ -7,10 +7,9 @@ router.use(userController.authorize);
 router.get("/", productController.getAll);
 //router.get("/", productController.getbyId); this can confuse the route with the above one since they
 //look similar eventhough the latter one is with query
-
+router.post("/add", productController.addProduct);
 //localhost:3000/product/2/sofia/price
 router.get("/:id/:name/:price", productController.getByIdparam);
-router.post("/", productController.addProduct);
 
 router.put("/:id", productController.updateProduct);
 

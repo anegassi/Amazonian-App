@@ -1,4 +1,15 @@
-let products = [];
+const mongoose = require("mongoose");
+
+const productSchema = mongoose.Schema(
+  {
+    id: { type: Number },
+    name: { type: String },
+    price: { type: Number },
+  },
+  { timestamps: true }
+);
+
+const productModel = mongoose.model("Products", productSchema);
 
 class Product {
   constructor(id, name, price) {
@@ -7,33 +18,46 @@ class Product {
     this.price = price;
   }
 
-  getAll() {
-    return products;
+  async getAll() {
+    return await productModel.find();
   }
-  getProductById(id) {
-    return products.find((x) => x.id === id);
+
+  async getLatestProducts(page, pageSize) {
+    const query = {},
+      sort = { id: "descending" }; //ascending -1 means descending order, 1 means ascending.
+    const offset = (page - 1) * pageSize;
+    return await productModel
+      .find(query)
+      .limit(pageSize)
+      .skip(offset)
+      .select(exclude)
+      .sort(sort);
   }
-  save() {
-    products.push(this);
-    return this.getAll();
+  async getProductById(id) {
+    const documents = await productModel.findOne({ id: id });
+    return documents;
   }
-  update() {
-    const product = products.find((x) => x.id === this.id);
+  async save() {
+    const newProduct = new productModel(this);
+    await newProduct.save();
+  }
+  async update() {
+    const product = await this.getProductById(this.id);
     if (product) {
-      product.name = this.name;
-      product.price = this.price;
-      return product;
-    } else return "item not found";
+      await ProductModel.updateOne({ id: this.id }, this);
+      return true;
+    } else {
+      return false;
+    }
   }
-  delete(id) {
-    const index = products.findIndex((x) => x.id === id);
-    if (index > -1) {
-      products.splice(index, 1);
-      return products;
-    } else return "item not found";
+  async delete(productId) {
+    const product = await this.getProductById(productId);
+    if (product) {
+      await ProductModel.deleteOne({ id: productId });
+      return true;
+    } else {
+      return false;
+    }
   }
 }
 module.exports = Product;
-
-products.push(new Product(1, "aradom", 12));
-products.push(new Product(2, "sofia", 21));
