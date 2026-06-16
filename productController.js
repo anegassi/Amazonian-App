@@ -1,44 +1,51 @@
 const { response } = require("express");
 const Product = require("./product");
 
-exports.getAll = (req, res) => {
-  console.log(req.query.id);
-  let product = new Product();
-  let products = product.getAll();
-  res.send(JSON.stringify(products));
-};
-// exports.getbyId = (req, res) => {
-//   const product = new Product();
-//   console.log(req.query.id);
-//   const products = product.getProductById(parseInt(req.query.id));
-//   res.send(products);
-// };
+let dummy = new Product();
 
-exports.getByIdparam = (req, res) => {
-  const product = new Product();
-  const products = product.getProductById(parseInt(req.params.id));
-  res.send(products);
+exports.middleware = (req, res, next) => {
+  if (req.user.role == "admin") next();
+  else res.send("you are not authorized");
 };
-exports.addProduct = (req, res) => {
-  const { id, name, price } = req.body;
-  const newProduct = new Product(id, name, price);
-  const duplicateproducts = newProduct.getProductById(id);
-  if (duplicateproducts) res.send("its a duplicate");
-  else {
-    const products = newProduct.save();
+
+exports.getAll = async (req, res) => {
+  if (req.query.latest) {
+    const { latest, number } = req.query;
+    let products = await dummy.getLatestProducts(latest, number);
+    res.send(JSON.stringify(products));
+  } else {
+    let products = await dummy.getAll();
     res.send(JSON.stringify(products));
   }
 };
 
-exports.updateProduct = (req, res) => {
+exports.getByIdparam = async (req, res) => {
+  const product = await dummy.getProductById(parseInt(req.params.id));
+  if (product) res.send(product);
+  else res.send("register the product ");
+};
+exports.addProduct = async (req, res) => {
   const { id, name, price } = req.body;
-  const updateProduct = new Product(id, name, price);
-  const updated = updateProduct.update();
-  res.send(updated);
+  const newProduct = new Product(id, name, price);
+  let products = await dummy.getAll();
+  let product = products.find((x) => x.id === id);
+  if (product) {
+    res.send("The product is duplicated");
+  }
+  const saved = await newProduct.save();
+  res.send(saved);
 };
 
-exports.deleteById = (req, res) => {
+exports.updateProduct = async (req, res) => {
+  const { id, name, price } = req.body;
+  const updateProduct = new Product(id, name, price);
+  const updated = await updateProduct.update();
+  if (updated) res.send(updateProduct);
+  else res.send("this product doesnt exist ");
+};
+
+exports.deleteById = async (req, res) => {
   const deleteProduct = new Product();
-  const products = deleteProduct.delete(parseInt(req.params.id));
+  const products = await deleteProduct.delete(parseInt(req.params.id));
   res.send(JSON.stringify(products));
 };

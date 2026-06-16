@@ -53,7 +53,7 @@ class Product {
   async delete(productId) {
     const product = await this.getProductById(productId);
     if (product) {
-      await ProductModel.deleteOne({ id: productId });
+      await productModel.deleteOne({ id: productId });
       return true;
     } else {
       return false;
