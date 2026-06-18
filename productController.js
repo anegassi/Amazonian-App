@@ -1,10 +1,16 @@
 const { response } = require("express");
 const Product = require("./product");
+const Order = require("./order");
 
 let dummy = new Product();
 
 exports.middleware = (req, res, next) => {
   if (req.user.role == "admin") next();
+  else res.send("you are not authorized");
+};
+
+exports.checkoutMiddleware = (req, res, next) => {
+  if (req.user.role == "user") next();
   else res.send("you are not authorized");
 };
 
@@ -48,4 +54,10 @@ exports.deleteById = async (req, res) => {
   const deleteProduct = new Product();
   const products = await deleteProduct.delete(parseInt(req.params.id));
   res.send(JSON.stringify(products));
+};
+
+exports.checkout = async (req, res) => {
+  const order = new Order();
+  const total = await order.save(req.body, req.user._id);
+  res.send(total);
 };

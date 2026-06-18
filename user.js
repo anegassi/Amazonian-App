@@ -19,7 +19,7 @@ class User {
   async getUser(username, password) {
     const user = await UserModel.find({ username: username });
     if (user) {
-      const verified = bcrypt.compare(password, user.password);
+      const verified = bcrypt.compareSync(password, user.password);
       if (verified) return user;
       else throw new Error("wrong password");
     } else throw new Error("wrong username");

@@ -22,4 +22,10 @@ router.delete(
   productController.middleware,
   productController.deleteById
 );
+
+router.post(
+  "/checkout",
+  productController.checkoutMiddleware,
+  productController.checkout
+);
 module.exports = router;
